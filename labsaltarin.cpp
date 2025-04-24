@@ -17,22 +17,61 @@ struct Labyrinth
 
 struct Node
 {
-    int coorX, coorY;
-    Node(int x, int y) : coorX(x), coorY(y) {}
+    int coorX, coorY, cost;
+    Node(int x, int y) : coorX(x), coorY(y), cost(0) {}
+    Node(int x, int y, int cost) : coorX(x), coorY(y), cost(cost) {}
+    bool operator<(const Node& other) const {
+        return cost > other.cost; // Para la cola de prioridad
+    }   
 };
-
-struct NodeU
+ 
+void uniformCostSearch(int fin, int cIn, int fdest, int cdest, std::vector<Node>& actualPath, 
+    std::vector<std::vector<bool>>& visited, std::vector<std::vector<int>>& lab, int f, int c)
 {
-    int x, y, cost;
-    NodeU(int x, int y, int cost) : x(x), y(y), cost(cost) {}
-    bool operator<(const NodeU& other) const {
-        return cost > other.cost; 
+    std::priority_queue<Node> pq;
+    pq.push(Node(fin, cIn, lab[fin][cIn])); // Agregar nodo inicial a la cola de prioridad
+    
+
+    while(!pq.empty()){
+
+        Node current = pq.top();
+        pq.pop();
+
+        int x = current.coorX;
+        int y = current.coorY;
+        int cost = current.cost;
+
+        if(x >= f || x < 0 || y >= c || y < 0 || visited[x][y] == true) continue;
+
+        visited[x][y] = true;
+
+        if(x == fdest && y == cdest){
+            std::cout << cost;
+            return;
+        }
+
+        int mov = lab[x][y];
+        int mx[] = {mov,-mov,0,0};
+        int my[] = {0,0,mov,-mov};
+ 
+    for (int i = 0; i < 4; i++)
+    {
+        int newx = x + mx[i];
+        int newy = y + my[i];
+        
+        if(newx >= 0 && newx < f && newy < c && newy >= 0 && !visited[newx][newy])
+        {
+            int newCost = cost + lab[newx][newy];
+            pq.push(Node(newx,newy,newCost));
+        }
+
     }
-};
+    
 
-void uniformCostSearch() {
 
-};
+   }
+
+}
 
 void Dfs(int x , int y, int fdest, int cdest, std::vector<Node>& actualPath,
      std::vector<Node>& minPath, std::vector<std::vector<bool>>& visited, std::vector<std::vector<int>>& lab, int f, int c) {
@@ -54,7 +93,8 @@ void Dfs(int x , int y, int fdest, int cdest, std::vector<Node>& actualPath,
     int mov = lab[x][y]; // cantidad de movimientos
     int movX[] = {mov, -mov, 0, 0 }; // movimientos en x
     int movY[] = {0, 0, mov, -mov}; // movimientos en y
-    for(int i = 0; i < 4; i++){
+    for(
+        int i = 0; i < 4; i++){
         int newX = x + movX[i];
         int newY = y + movY[i];
         Dfs(newX, newY, fdest, cdest, actualPath, minPath, visited, lab, f, c); 
@@ -148,10 +188,12 @@ int main() {
             else{
                 std::string result = std::to_string(minPath.size() - 1); // Guardar el resultado en la cola
                 results.push(result);
+                uniformCostSearch(actLab.fin, actLab.cIn,actLab.fdest, actLab.cdest, actualPath, visited, actLab.lab, actLab.f, actLab.c);
             }
-
+            
 
         labs.erase(labs.begin());
+    
         actualPath.clear();
         minPath.clear(); 
         visited.clear(); 
